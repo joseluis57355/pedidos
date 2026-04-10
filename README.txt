@@ -8,15 +8,22 @@ Stack tecnologico:
 - REST API
 
 Funcionalidades:
-- CRUD orders
-- Dockerized
-- Clean architecture
-- Swagger
+- Ordenes CRUD 
+- Arquitectura Limpia
+- API REST con Spring Boot
+- Persistencia con PostgreSQL
+- Documentación con Swagger
+- Validaciones con Bean Validation
+- DTO + Mapper pattern
+- Manejo global de excepciones
+- Dockerización con Docker
+- Orquestación con Docker Compose
+- Arquitectura preparada para microservicios
 
 Trabajo en proceso:
 Estoy aprendiendo como funciona AWS y haciendo pruebas para tener el servicio en una instancia EC2, conectado a una base de datos Aurora(RDS). 
 
-------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------
 
 Como ejecutar el proyecto:
 -Requisitos:
