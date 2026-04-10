@@ -11,3 +11,4 @@ Funcionalidades:
 - CRUD orders
 - Dockerized
 - Clean architecture
+- Swagger
