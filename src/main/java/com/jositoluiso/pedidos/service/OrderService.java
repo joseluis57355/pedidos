@@ -17,6 +17,14 @@ public class OrderService {
 
     public Order create(Order order) {
         order.setCreatedAt(LocalDateTime.now());
+        // Validación de datos
+        if (order.getCustomerName() == null || order.getCustomerName().isEmpty()) {
+            throw new IllegalArgumentException("Customer name cannot be empty");
+        }
+        if (order.getAmount() < 0) {
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
+        // Guardar el pedido
         return orderRepository.save(order);
     }
     
