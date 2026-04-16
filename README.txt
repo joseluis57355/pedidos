@@ -20,8 +20,7 @@ Funcionalidades:
 - Orquestación con Docker Compose
 - Arquitectura preparada para microservicios
 
-Trabajo en proceso:
-Estoy aprendiendo como funciona AWS y haciendo pruebas para tener el servicio en una instancia EC2, conectado a una base de datos Aurora(RDS). 
+-Despliegue en AWS: http://18.101.110.59:8080/swagger-ui/index.html
 
 -------------------------------------------------------------------------------------------------------------------------------
 
