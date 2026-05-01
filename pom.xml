@@ -68,6 +68,13 @@
 			<scope>test</scope>
 		</dependency>
 
+        <!-- In-memory database for tests -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
         <!-- Springdoc OpenAPI UI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -137,4 +144,3 @@
 	</build>
 
 </project>
-
