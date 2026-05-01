@@ -6,17 +6,27 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - orders-network
 
   orders-service:
-    build: .
+    image: ghcr.io/joseluis57355/pedidos:latest
     container_name: orders-service
-    ports:
-      - "${APP_PORT}:8080"
     depends_on:
       - postgres
+    ports:
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - orders-network
+
+volumes:
+  postgres_data:
+
+networks:
+  orders-network:
