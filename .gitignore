@@ -38,4 +38,4 @@ build/
 .env.*
 !.env.example
 src/main/resources/applicationRDS.properties
-.DockerfileRDS
+DockerfileRDS
