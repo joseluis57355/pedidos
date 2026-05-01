@@ -740,8 +740,8 @@ Este proyecto está bajo licencia **MIT** - Ver `LICENSE.md` para detalles.
 **Jose Luis Sánchez**
 - 📧 Email: joseluis@gmail.com
 - 🔗 GitHub: [@joseluis57355](https://github.com/joseluis57355)
-- 💼 LinkedIn: [Jose Luis Sánchez](https://linkedin.com/in/joseluis)
-- 🌐 Portfolio: [joseluis.github.io](https://joseluis.github.io)
+- 💼 LinkedIn: [Jose Luis Sánchez](https://www.linkedin.com/in/jose-luis-sanchez-tebar)
+- 🌐 Portfolio: [joseluis57355.github.io](https://joseluis57355.github.io)
 
 **Desarrollador Backend Java** | Spring Boot | Microservicios | DevOps
 - ✅ 3+ años de experiencia profesional

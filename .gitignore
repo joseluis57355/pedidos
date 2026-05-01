@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local environment ###
+.env
+.env.*
+!.env.example
+src/main/resources/applicationRDS.properties
+DockerfileRDS
+docker-compose-rds.yml
