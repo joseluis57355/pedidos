@@ -21,6 +21,7 @@ Una API REST profesional para gestión de pedidos construida con **Java 21**, **
 - [API Endpoints](#api-endpoints)
 - [Testing](#testing)
 - [Docker](#docker)
+- [CI/CD Pipeline](#cicd-pipeline)
 - [Arquitectura](#arquitectura)
 - [Mejoras Futuras](#mejoras-futuras)
 - [Autor](#autor)
@@ -41,7 +42,7 @@ Una API REST profesional para gestión de pedidos construida con **Java 21**, **
 - ✅ **Docker Compose** - Orquestación local con PostgreSQL
 - ✅ **Variables de entorno** - Configuración flexible y segura
 - ✅ **Despliegue en AWS** - Documentación y scripts incluidos
-- ✅ **CI/CD Ready** - Estructura preparada para GitHub Actions
+- ✅ **CI/CD con GitHub Actions** - Pipeline automatizado (Build, Test, Docker, Deploy)
 
 ### Testing & Documentación
 - ✅ **Tests unitarios** - JUnit 5 + Mockito (6 tests)
@@ -82,12 +83,15 @@ Una API REST profesional para gestión de pedidos construida con **Java 21**, **
 | **Springdoc OpenAPI** | 2.8.17 | Swagger/OpenAPI |
 | **Swagger UI** | 5.32.2 | UI interactiva |
 
-### Herramientas
+### DevOps & CI/CD
 | Herramienta | Propósito |
 |---|---|
 | **Maven** | Build & dependency management |
 | **Docker** | Contenerización |
 | **Docker Compose** | Orquestación local |
+| **GitHub Actions** | CI/CD automation |
+| **Docker Buildx** | Multi-platform builds |
+| **GitHub Container Registry** | Docker image hosting |
 
 ---
 
@@ -461,6 +465,80 @@ ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 - Working directory: `/app`
 - Copy: JAR compilado
 - Entrypoint: Comando para ejecutar
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### ¿Qué es el CI/CD Pipeline?
+
+El proyecto incluye un **pipeline de CI/CD completamente automatizado** con GitHub Actions que:
+
+- ✅ **Compila** el código en cada push
+- ✅ **Ejecuta tests** automáticamente
+- ✅ **Construye imagen Docker** en rama main
+- ✅ **Publica en registry** (GitHub Container Registry)
+- ✅ **Escanea seguridad** del código
+- ✅ **Analiza calidad** del código (SonarCloud)
+- ✅ **Notifica** en Slack
+
+### Flujo del Pipeline
+
+```
+Push a GitHub
+    ↓
+Checkout código
+    ↓
+Setup JDK 21
+    ↓
+Maven: Build + Test
+    ↓
+¿Tests OK?
+    ├─ NO → ❌ Fallar
+    └─ SÍ → Continuar
+        ↓
+    ¿Es rama main?
+        ├─ NO → Fin ✅
+        └─ SÍ → Continuar
+            ↓
+        Docker: Build image
+            ↓
+        Push a GHCR
+            ↓
+        Slack notification ✅
+```
+
+### Workflows Incluidos
+
+| Workflow | Disparo | Acciones |
+|---|---|---|
+| `build-and-test` | Todos los pushes | Maven build, test, SonarCloud |
+| `docker-build` | Solo en `main` | Docker build & push a ghcr.io |
+| `security-scan` | Todos los pushes | Trivy vulnerability scan |
+| `slack-notification` | Al terminar | Notifica resultado en Slack |
+
+### Ver el Pipeline en GitHub
+
+1. Ir a repository → **Actions** tab
+2. Seleccionar el último workflow
+3. Expandir job para ver logs
+4. Resultados de tests en **Checks**
+
+### Configurar Notificaciones Slack
+
+Para recibir notificaciones en Slack:
+
+```bash
+# 1. Crear webhook en Slack
+# Apps → Incoming Webhooks → Create New
+
+# 2. En GitHub, agregar secret
+# Settings → Secrets → New repository secret
+# Name: SLACK_WEBHOOK
+# Value: [tu webhook URL]
+```
+
+**Más detalles**: Ver [WORKFLOWS.md](./WORKFLOWS.md)
 
 ---
 
