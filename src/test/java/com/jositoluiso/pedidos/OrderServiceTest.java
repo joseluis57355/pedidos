@@ -3,6 +3,7 @@ package com.jositoluiso.pedidos;
 import com.jositoluiso.pedidos.entity.Order;
 import com.jositoluiso.pedidos.repository.OrderRepository;
 import com.jositoluiso.pedidos.service.OrderService;
+import com.jositoluiso.pedidos.config.MetricsConfig;
 
 // JUnit
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +24,11 @@ class OrderServiceTest {
     @Mock
     private OrderRepository orderRepository;
 
-    // Inyectamos el mock en el servicio
+    // Mock de métricas
+    @Mock
+    private MetricsConfig metricsConfig;
+
+    // Inyectamos los mocks en el servicio
     @InjectMocks
     private OrderService orderService;
 
@@ -65,6 +70,9 @@ class OrderServiceTest {
         // VERIFICAMOS INTERACCIONES
         verify(orderRepository, times(1))
                 .save(any(Order.class));
+        
+        // VERIFICAMOS QUE SE INCREMENTÓ EL CONTADOR DE ÓRDENES CREADAS
+        verify(metricsConfig, times(1)).incrementOrdersCreated();
     }
 
     @Test
