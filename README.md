@@ -538,6 +538,21 @@ Para recibir notificaciones en Slack:
 # Value: [tu webhook URL]
 ```
 
+### Redis Cache
+
+The application uses Redis as a distributed cache through Spring Cache.
+
+Cached operations:
+- `GET /orders`: caches the full order list.
+- `GET /orders/{id}`: caches individual orders by ID.
+
+Cache invalidation:
+- `POST /orders`: evicts the cached order list.
+- `DELETE /orders/{id}`: evicts the cached order list and the individual order cache.
+
+Redis is configured through Docker Compose and protected with password authentication.
+Cached values are serialized as JSON using Jackson with Java Time support for `LocalDateTime`.
+
 **Más detalles**: Ver [WORKFLOWS.md](./WORKFLOWS.md)
 
 ---
@@ -696,9 +711,9 @@ public class OrderService {
 ## 🔮 Mejoras Futuras
 
 ### Corto plazo (próximas semanas)
-- [ ] GitHub Actions - CI/CD pipeline
-- [ ] Actuator + Micrométrica - Monitoring
-- [ ] Redis - Caching
+- [ x ] GitHub Actions - CI/CD pipeline
+- [ x ] Actuator + Micrométrica - Monitoring
+- [ x ] Redis - Caching
 - [ ] Kubernetes manifests - Orquestación
 
 ### Mediano plazo

@@ -39,3 +39,6 @@ build/
 src/main/resources/applicationRDS.properties
 DockerfileRDS
 docker-compose-rds.yml
+*.md
+!README.md
+*.ps1
