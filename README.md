@@ -39,10 +39,12 @@ Una API REST profesional para gestión de pedidos construida con **Java 21**, **
 
 ### DevOps & Infrastructure
 - ✅ **Contenerización con Docker** - Dockerfile optimizado
-- ✅ **Docker Compose** - Orquestación local con PostgreSQL
+- ✅ **Docker Compose** - Orquestación local con PostgreSQL y Redis
+- ✅ **Spring Boot Actuator + Micrometer** - Health checks, metrics y Prometheus
+- ✅ **Redis Cache** - Spring Cache con Redis y serialización JSON
 - ✅ **Variables de entorno** - Configuración flexible y segura
 - ✅ **Despliegue en AWS** - Documentación y scripts incluidos
-- ✅ **CI/CD con GitHub Actions** - Pipeline automatizado (Build, Test, Docker, Deploy)
+- ✅ **CI/CD con GitHub Actions** - Pipeline automatizado (Build, Test, Docker image push, Deploy)
 
 ### Testing & Documentación
 - ✅ **Tests unitarios** - JUnit 5 + Mockito (6 tests)
@@ -147,6 +149,15 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=tu_contraseña_segura
 POSTGRES_PORT=5432
 APP_PORT=8080
+
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/orders
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=tu_contraseña_segura
+
+SPRING_DATA_REDIS_HOST=localhost
+SPRING_DATA_REDIS_PORT=6379
+SPRING_DATA_REDIS_PASSWORD=tu_contraseña_segura
+SPRING_CACHE_TYPE=redis
 ```
 
 ---
@@ -191,6 +202,7 @@ docker-compose up -d
 
 Esto inicia:
 - 🐘 PostgreSQL en puerto 5432
+- 🧠 Redis en puerto 6379
 - 🚀 API en puerto 8080
 
 **2. Verificar servicios**
@@ -231,7 +243,10 @@ java -jar target/pedidos-0.0.1-SNAPSHOT.jar
 - **API REST**: `http://localhost:8080`
 - **Swagger UI**: `http://localhost:8080/swagger-ui.html`
 - **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
-- **Health Check**: `http://localhost:8080/actuator/health`
+- **Actuator - Health**: `http://localhost:8080/actuator/health`
+- **Actuator - Info**: `http://localhost:8080/actuator/info`
+- **Actuator - Prometheus**: `http://localhost:8080/actuator/prometheus`
+- **Actuator - Metrics**: `http://localhost:8080/actuator/metrics`
 
 ---
 
@@ -474,13 +489,13 @@ ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 El proyecto incluye un **pipeline de CI/CD completamente automatizado** con GitHub Actions que:
 
-- ✅ **Compila** el código en cada push
+- ✅ **Compila** el código en cada push y pull request
 - ✅ **Ejecuta tests** automáticamente
 - ✅ **Construye imagen Docker** en rama main
-- ✅ **Publica en registry** (GitHub Container Registry)
-- ✅ **Escanea seguridad** del código
-- ✅ **Analiza calidad** del código (SonarCloud)
-- ✅ **Notifica** en Slack
+- ✅ **Publica en GitHub Container Registry** cuando la rama principal pasa
+- ✅ **Escanea seguridad** con Trivy
+- ✅ **Analiza calidad** con SonarCloud (si `SONAR_TOKEN` está configurado)
+- ✅ **Notifica** en Slack opcionalmente via `SLACK_WEBHOOK`
 
 ### Flujo del Pipeline
 
@@ -512,10 +527,11 @@ Maven: Build + Test
 
 | Workflow | Disparo | Acciones |
 |---|---|---|
-| `build-and-test` | Todos los pushes | Maven build, test, SonarCloud |
-| `docker-build` | Solo en `main` | Docker build & push a ghcr.io |
-| `security-scan` | Todos los pushes | Trivy vulnerability scan |
-| `slack-notification` | Al terminar | Notifica resultado en Slack |
+| `build-and-test` | Push/PR en `main`, `develop`, `feature/**` | Compila, ejecuta tests, publica resultados |
+| `docker-build` | Solo en `main` | Construye imagen Docker y la empuja al registry |
+| `code-quality` | Push/PR | SonarCloud scan opcional si está configurado |
+| `security-scan` | Push/PR | Escanea con Trivy y publica resultados SARIF |
+| `slack-notification` | Al terminar | Notificaciones en Slack opcionales |
 
 ### Ver el Pipeline en GitHub
 
@@ -753,7 +769,7 @@ Este proyecto está bajo licencia **MIT** - Ver `LICENSE.md` para detalles.
 ## 👨‍💻 Autor
 
 **Jose Luis Sánchez**
-- 📧 Email: joseluis@gmail.com
+- 📧 Email: joseluis57355@gmail.com
 - 🔗 GitHub: [@joseluis57355](https://github.com/joseluis57355)
 - 💼 LinkedIn: [Jose Luis Sánchez](https://www.linkedin.com/in/jose-luis-sanchez-tebar)
 - 🌐 Portfolio: [joseluis57355.github.io](https://joseluis57355.github.io)
@@ -769,7 +785,7 @@ Este proyecto está bajo licencia **MIT** - Ver `LICENSE.md` para detalles.
 
 ¿Preguntas o problemas? 
 - Abre un [Issue en GitHub](https://github.com/joseluis57355/pedidos/issues)
-- Envía un email a joseluis@gmail.com
+- Envía un email a joseluis57355@gmail.com
 
 ---
 
