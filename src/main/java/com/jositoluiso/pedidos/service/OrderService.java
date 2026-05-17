@@ -153,16 +153,30 @@ public class OrderService {
 
     /**
      * Eliminar orden
-     * Invalida el caché de lista completa y el caché individual de la orden
+     * Restaura stock de los productos del pedido y actualiza cachés
      */
     @Caching(evict = {
         @CacheEvict(value = "orders", allEntries = true),
-        @CacheEvict(value = "order", key = "#id")
+        @CacheEvict(value = "order", key = "#id"),
+        @CacheEvict(value = "products", allEntries = true),
+        @CacheEvict(value = "product", allEntries = true)
     })
+    @Transactional
     public void delete(Long id) {
-        orderRepository.deleteById(id);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        for (OrderItem item : order.getItems()) {
+            Product product = item.getProduct();
+            if (product != null) {
+                product.setStock(product.getStock() + item.getQuantity());
+                productRepository.save(product);
+            }
+        }
+
+        orderRepository.delete(order);
         metricsConfig.incrementOrdersDeleted();
     }
 
-
 }
+

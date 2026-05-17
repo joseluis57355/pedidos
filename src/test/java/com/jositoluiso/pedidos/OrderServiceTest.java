@@ -1,6 +1,7 @@
 package com.jositoluiso.pedidos;
 
 import com.jositoluiso.pedidos.entity.Order;
+import com.jositoluiso.pedidos.entity.OrderItem;
 import com.jositoluiso.pedidos.entity.Product;
 import com.jositoluiso.pedidos.repository.OrderRepository;
 import com.jositoluiso.pedidos.repository.ProductRepository;
@@ -147,5 +148,44 @@ class OrderServiceTest {
         // VERIFICAMOS QUE NO SE LLAMA A save
         verify(orderRepository, never())
                 .save(any(Order.class));
+    }
+
+    @Test
+    void shouldRestoreStockWhenDeletingOrder() {
+        Product product = Product.builder()
+                .id(1L)
+                .name("Test Product")
+                .price(BigDecimal.valueOf(50.0))
+                .stock(10)
+                .active(true)
+                .build();
+
+        OrderItem item = OrderItem.builder()
+                .id(1L)
+                .product(product)
+                .quantity(2)
+                .unitPrice(BigDecimal.valueOf(50.0))
+                .subtotal(BigDecimal.valueOf(100.0))
+                .build();
+
+        Order order = Order.builder()
+                .id(1L)
+                .customerName("Juan")
+                .amount(BigDecimal.valueOf(100.0))
+                .status(OrderStatus.PENDING)
+                .items(java.util.List.of(item))
+                .build();
+
+        item.setOrder(order);
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        orderService.delete(1L);
+
+        assertEquals(12, product.getStock());
+        verify(productRepository, times(1)).save(product);
+        verify(orderRepository, times(1)).delete(order);
+        verify(metricsConfig, times(1)).incrementOrdersDeleted();
     }
 }
