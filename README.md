@@ -1,9 +1,9 @@
 # 📦 Pedidos API - REST API para Gestión de Órdenes
 
-Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS.
+Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS. Ver demo en: [http://18.101.110.59:8080/swagger-ui/index.html](https://www.oracle.com/java/technologies/downloads/)
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Tests](https://img.shields.io/badge/tests-6%2F6%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
 ![Java](https://img.shields.io/badge/java-21-orange)
 ![Spring Boot](https://img.shields.io/badge/spring%20boot-3.5.14-green)
@@ -238,15 +238,24 @@ docker-compose up
 java -jar target/pedidos-0.0.1-SNAPSHOT.jar
 ```
 
+#### Opción 4: En producción con docker-compose.prod.yml
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
 ### Acceder a la aplicación
 
 - **API REST**: `http://localhost:8080`
-- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+- **Swagger UI local**: `http://localhost:8080/swagger-ui/index.html`
 - **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
 - **Actuator - Health**: `http://localhost:8080/actuator/health`
 - **Actuator - Info**: `http://localhost:8080/actuator/info`
 - **Actuator - Prometheus**: `http://localhost:8080/actuator/prometheus`
 - **Actuator - Metrics**: `http://localhost:8080/actuator/metrics`
+
+### Swagger en producción
+
+- **URL Swagger producción**: `http://18.101.110.59:8080/swagger-ui/index.html`
 
 ---
 
@@ -368,13 +377,16 @@ mvn test
 
 ### Tests incluidos
 
-| Clase | Descripción | Tests |
-|---|---|---|
-| `PedidosApplicationTests` | Integration test del contexto Spring | 1 |
-| `OrderServiceTest` | Tests unitarios del service | 3 |
-| `OrderControllerTest` | Tests unitarios del controller | 2 |
+| Clase | Descripción |
+|---|---|
+| `PedidosApplicationTests` | Test de arranque de Spring Boot |
+| `OrderServiceTest` | Tests unitarios del servicio de pedidos |
+| `OrderControllerTest` | Tests unitarios del controlador de órdenes |
+| `OrderIntegrationTest` | Tests de integración con contexto Spring |
+| `ProductServiceTest` | Tests unitarios del servicio de productos |
+| `ProductControllerTest` | Tests unitarios del controlador de productos |
 
-**Total**: 6 tests, todos passing ✅
+**Total**: 23 tests, todos passing ✅
 
 ### Ejecutar tests específicos
 
@@ -384,35 +396,6 @@ mvn test -Dtest=OrderServiceTest
 
 # Solo tests del controller
 mvn test -Dtest=OrderControllerTest
-```
-
-### Ejemplo: Test del Service
-
-```java
-@Test
-void shouldCreateOrderSuccessfully() {
-    // ARRANGE
-    Order order = new Order();
-    order.setCustomerName("Juan");
-    order.setAmount(100.0);
-    order.setStatus("CREATED");
-
-    when(orderRepository.save(any(Order.class)))
-            .thenReturn(Order.builder()
-                    .id(1L)
-                    .customerName("Juan")
-                    .amount(100.0)
-                    .status("CREATED")
-                    .build());
-
-    // ACT
-    Order response = orderService.create(order);
-
-    // ASSERT
-    assertNotNull(response);
-    assertEquals("Juan", response.getCustomerName());
-    verify(orderRepository, times(1)).save(any(Order.class));
-}
 ```
 
 ---
@@ -444,7 +427,7 @@ docker run -d \
   pedidos-api:latest
 ```
 
-### Docker Compose (RECOMENDADO)
+### Docker Compose local (RECOMENDADO)
 
 **Iniciar**
 ```bash
@@ -465,6 +448,23 @@ docker-compose logs -f postgres
 **Reconstruir imagen**
 ```bash
 docker-compose up -d --build
+```
+
+### Docker Compose producción
+
+**Levantar en producción**
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+**Apagar y borrar volúmenes antiguos**
+```bash
+docker compose -f docker-compose.prod.yml down --volumes --remove-orphans
+```
+
+**Usar archivo de entorno de producción**
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
 ### Dockerfile Explicado
