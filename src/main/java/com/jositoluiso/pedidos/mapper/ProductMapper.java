@@ -1,4 +1,4 @@
-package com.jositoluiso.pedidos.controller;
+package com.jositoluiso.pedidos.mapper;
 
 import com.jositoluiso.pedidos.dto.ProductRequestDTO;
 import com.jositoluiso.pedidos.dto.ProductResponseDTO;

@@ -30,6 +30,7 @@ public class CacheConfig {
                         .allowIfSubType("com.jositoluiso.pedidos")
                         .allowIfSubType("java.util")
                         .allowIfSubType("java.time")
+                        .allowIfSubType("java.math")
                         .build();
 
         ObjectMapper objectMapper = new ObjectMapper();

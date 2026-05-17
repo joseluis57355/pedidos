@@ -1,9 +1,16 @@
 package com.jositoluiso.pedidos;
 
 import com.jositoluiso.pedidos.entity.Order;
+import com.jositoluiso.pedidos.entity.Product;
 import com.jositoluiso.pedidos.repository.OrderRepository;
+import com.jositoluiso.pedidos.repository.ProductRepository;
 import com.jositoluiso.pedidos.service.OrderService;
 import com.jositoluiso.pedidos.config.MetricsConfig;
+import com.jositoluiso.pedidos.dto.OrderRequestDTO;
+import com.jositoluiso.pedidos.dto.OrderItemRequestDTO;
+import com.jositoluiso.pedidos.dto.OrderResponseDTO;
+import com.jositoluiso.pedidos.mapper.OrderMapper;
+import com.jositoluiso.pedidos.enums.OrderStatus;
 
 // JUnit
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -24,9 +34,15 @@ class OrderServiceTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private ProductRepository productRepository;
+
     // Mock de métricas
     @Mock
     private MetricsConfig metricsConfig;
+
+    @Mock
+    private OrderMapper orderMapper;
 
     // Inyectamos los mocks en el servicio
     @InjectMocks
@@ -41,69 +57,88 @@ class OrderServiceTest {
     @Test
     void shouldCreateOrderSuccessfully() {
 
-        // DATOS DE ENTRADA
-        Order order = new Order();
-        order.setCustomerName("Juan");
-        order.setAmount(100.0);
-        order.setStatus("CREATED");
+        // CREAR UN PRODUCTO MOCKEADO
+        Product product = Product.builder()
+                .id(1L)
+                .name("Test Product")
+                .price(BigDecimal.valueOf(50.0))
+                .stock(100)
+                .active(true)
+                .build();
 
-        // SIMULAMOS LO QUE DEVUELVE EL REPOSITORY
+        // PREPARAR EL ITEM DE LA ORDEN
+        OrderItemRequestDTO itemRequest = OrderItemRequestDTO.builder()
+                .productId(1L)
+                .quantity(2)
+                .build();
+
+        // PREPARAR LA ORDEN
+        OrderRequestDTO orderRequest = OrderRequestDTO.builder()
+                .customerName("Juan")
+                .items(java.util.List.of(itemRequest))
+                .build();
+
+        // PREPARAR LA ORDEN GUARDADA
         Order savedOrder = Order.builder()
                 .id(1L)
                 .customerName("Juan")
-                .amount(100.0)
-                .status("CREATED")
+                .amount(BigDecimal.valueOf(100.0))
+                .status(OrderStatus.PENDING)
                 .build();
 
-        // Cuando se llame a save, devuelve este objeto
+        // PREPARAR LA RESPUESTA MOCKEADA
+        OrderResponseDTO expectedResponse = OrderResponseDTO.builder()
+                .id(1L)
+                .customerName("Juan")
+                .amount(BigDecimal.valueOf(100.0))
+                .status(OrderStatus.PENDING)
+                .build();
+
+        // SIMULAR EL COMPORTAMIENTO DE LOS REPOSITORIES
+        when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
         when(orderRepository.save(any(Order.class)))
                 .thenReturn(savedOrder);
+        when(orderMapper.toResponseDTO(any(Order.class)))
+                .thenReturn(expectedResponse);
 
-        // EJECUTAMOS EL MÉTODO REAL
-        Order response = orderService.create(order);
+        // EJECUTAR EL MÉTODO
+        OrderResponseDTO response = orderService.createOrder(orderRequest);
 
-        // VALIDAMOS RESULTADO
+        // VALIDACIONES
         assertNotNull(response);
         assertEquals("Juan", response.getCustomerName());
-        assertEquals(100.0, response.getAmount());
+        assertEquals(OrderStatus.PENDING, response.getStatus());
 
-        // VERIFICAMOS INTERACCIONES
-        verify(orderRepository, times(1))
-                .save(any(Order.class));
-        
-        // VERIFICAMOS QUE SE INCREMENTÓ EL CONTADOR DE ÓRDENES CREADAS
-        verify(metricsConfig, times(1)).incrementOrdersCreated();
+        // VERIFICAR LAS INTERACCIONES
+        verify(productRepository, times(1)).findById(1L);
+        verify(orderRepository, times(1)).save(any(Order.class));
+        verify(orderMapper, times(1)).toResponseDTO(any(Order.class));
     }
 
     @Test
     void shouldThrowExceptionForInvalidOrder() {
         // PREPARAMOS LOS DATOS DE ENTRADA INVÁLIDOS
-        Order order = new Order();
+        OrderRequestDTO order = new OrderRequestDTO();
         order.setCustomerName(""); // Nombre vacío
-        order.setAmount(-10.0); // Monto negativo
-        order.setStatus("CREATED");
+        order.setItems(java.util.List.of()); // Items vacíos
 
         // VERIFICAMOS QUE SE LANZA UNA EXCEPCIÓN
         assertThrows(IllegalArgumentException.class, () -> {
-            orderService.create(order);
+            orderService.createOrder(order);
         });
     }
 
     @Test
     void shouldReturn400ForInvalidOrder() {
         // PREPARAMOS LOS DATOS DE ENTRADA INVÁLIDOS
-        Order order = new Order();
+        OrderRequestDTO order = new OrderRequestDTO();
         order.setCustomerName(""); // Nombre vacío
-        order.setAmount(-10.0); // Monto negativo
-        order.setStatus("CREATED");
-
-        // SIMULAMOS LO QUE DEVUELVE EL REPOSITORY (NO SE LLAMA A save)
-        when(orderRepository.save(any(Order.class)))
-                .thenThrow(new IllegalArgumentException("Customer name cannot be empty"));
+        order.setItems(java.util.List.of()); // Items vacíos
 
         // EJECUTAMOS EL MÉTODO REAL Y CAPTURAMOS LA EXCEPCIÓN
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            orderService.create(order);
+            orderService.createOrder(order);
         });
 
         // VALIDAMOS MENSAJE DE EXCEPCIÓN
