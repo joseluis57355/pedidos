@@ -3,6 +3,7 @@ package com.jositoluiso.pedidos.controller;
 import com.jositoluiso.pedidos.dto.ProductRequestDTO;
 import com.jositoluiso.pedidos.dto.ProductResponseDTO;
 import com.jositoluiso.pedidos.entity.Product;
+import com.jositoluiso.pedidos.mapper.ProductMapper;
 import com.jositoluiso.pedidos.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

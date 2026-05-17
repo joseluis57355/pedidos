@@ -1,5 +1,7 @@
 package com.jositoluiso.pedidos.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.*;
 
 import lombok.*;
@@ -14,10 +16,6 @@ public class OrderRequestDTO {
     @NotBlank(message = "Customer name is required")
     private String customerName;
 
-    @NotNull(message = "Amount is required")
-    @Positive(message = "Amount must be greater than 0")
-    private Double amount;
-
-    @NotBlank(message = "Status is required")
-    private String status;
+    @NotEmpty(message = "Items list cannot be empty")
+    private List<OrderItemRequestDTO> items;
 }

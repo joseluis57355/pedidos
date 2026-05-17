@@ -1,14 +1,30 @@
 package com.jositoluiso.pedidos.service;
 
 import com.jositoluiso.pedidos.entity.Order;
+import com.jositoluiso.pedidos.entity.OrderItem;
+import com.jositoluiso.pedidos.entity.Product;
+import com.jositoluiso.pedidos.enums.OrderStatus;
 import com.jositoluiso.pedidos.repository.OrderRepository;
+import com.jositoluiso.pedidos.repository.ProductRepository;
+import com.jositoluiso.pedidos.mapper.OrderMapper;
+import com.jositoluiso.pedidos.exception.ResourceNotFoundException;
+
+import jakarta.transaction.Transactional;
+
 import com.jositoluiso.pedidos.config.MetricsConfig;
+import com.jositoluiso.pedidos.dto.OrderItemRequestDTO;
+import com.jositoluiso.pedidos.dto.OrderRequestDTO;
+import com.jositoluiso.pedidos.dto.OrderResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,12 +34,14 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final MetricsConfig metricsConfig;
+    private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
 
     /**
      * Crear una nueva orden
      * Invalida el caché de lista completa después de crear
      */
-    @CacheEvict(value = "orders", allEntries = true)
+    /*@CacheEvict(value = "orders", allEntries = true)
     public Order create(Order order) {
         try {
             order.setCreatedAt(LocalDateTime.now());
@@ -32,7 +50,7 @@ public class OrderService {
                 metricsConfig.incrementOrdersCreationError();
                 throw new IllegalArgumentException("Customer name cannot be empty");
             }
-            if (order.getAmount() < 0) {
+            if (order.getAmount() == null || order.getAmount().compareTo(BigDecimal.ZERO) < 0) {
                 metricsConfig.incrementOrdersCreationError();
                 throw new IllegalArgumentException("Amount cannot be negative");
             }
@@ -46,6 +64,70 @@ public class OrderService {
             }
             throw e;
         }
+    }*/
+
+     /**
+     * Crear una nueva orden
+     * Invalida el caché de lista completa después de crear
+     */
+    @Caching(evict = {
+        @CacheEvict(value = "orders", allEntries = true),
+        @CacheEvict(value = "products", allEntries = true)
+    })
+    @Transactional
+    public OrderResponseDTO createOrder(OrderRequestDTO request) {
+        // Validación de datos básicos
+        if (request.getCustomerName() == null || request.getCustomerName().isEmpty()) {
+            metricsConfig.incrementOrdersCreationError();
+            throw new IllegalArgumentException("Customer name cannot be empty");
+        }
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            metricsConfig.incrementOrdersCreationError();
+            throw new IllegalArgumentException("Order must contain at least one item");
+        }
+
+        Order order = new Order();
+        order.setCustomerName(request.getCustomerName());
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreatedAt(LocalDateTime.now());
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (OrderItemRequestDTO itemRequest : request.getItems()) {
+
+            Product product = productRepository.findById(itemRequest.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+            if (!product.getActive()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product is not active");
+            }
+
+            if (product.getStock() < itemRequest.getQuantity()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough stock for product: " + product.getName());
+            }
+
+            BigDecimal unitPrice = product.getPrice();
+            BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
+
+            OrderItem item = new OrderItem();
+            item.setOrder(order);
+            item.setProduct(product);
+            item.setQuantity(itemRequest.getQuantity());
+            item.setUnitPrice(unitPrice);
+            item.setSubtotal(subtotal);
+
+            order.getItems().add(item);
+
+            product.setStock(product.getStock() - itemRequest.getQuantity());
+
+            totalAmount = totalAmount.add(subtotal);
+        }
+
+        order.setAmount(totalAmount);
+
+        Order savedOrder = orderRepository.save(order);
+
+        return orderMapper.toResponseDTO(savedOrder);
     }
     
     /**
@@ -81,4 +163,6 @@ public class OrderService {
         orderRepository.deleteById(id);
         metricsConfig.incrementOrdersDeleted();
     }
+
+
 }
