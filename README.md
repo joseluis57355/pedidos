@@ -1,6 +1,6 @@
 # 📦 Pedidos API - REST API para Gestión de Órdenes
 
-Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS. Ver demo en: [http://18.101.110.59:8080/swagger-ui/index.html](https://www.oracle.com/java/technologies/downloads/)
+Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS. Ver demo en: [http://18.101.110.59:8080/swagger-ui/index.html](http://18.101.110.59:8080/swagger-ui/index.html)
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen)
