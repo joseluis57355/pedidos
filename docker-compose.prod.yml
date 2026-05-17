@@ -8,6 +8,29 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - orders-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: orders-redis
+    command: ["redis-server", "--requirepass", "${SPRING_DATA_REDIS_PASSWORD}"]
+    ports:
+      - "${SPRING_DATA_REDIS_PORT}:${SPRING_DATA_REDIS_PORT}"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${SPRING_DATA_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - orders-network
 
@@ -15,18 +38,27 @@ services:
     image: ghcr.io/joseluis57355/pedidos:latest
     container_name: orders-service
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:${APP_PORT:-8080}"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT}
+      SPRING_DATA_REDIS_PASSWORD: ${SPRING_DATA_REDIS_PASSWORD}
+      SPRING_CACHE_TYPE: ${SPRING_CACHE_TYPE:-redis}
+    restart: unless-stopped
     networks:
       - orders-network
 
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   orders-network:
