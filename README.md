@@ -125,11 +125,16 @@ cd pedidos
 ### 2. Compilar el proyecto
 
 ```bash
-# Usando Maven directamente
-mvn clean install
+# Opciones para compilar (la aplicación se encuentra en la carpeta `pedidos-servicio`)
 
-# O usando el wrapper incluido
-./mvnw clean install
+# Usando Maven desde la raíz del repositorio
+mvn -f pedidos-servicio/pom.xml clean install
+
+# O usando el wrapper Maven dentro de `pedidos-servicio`
+./pedidos-servicio/mvnw clean install
+
+# En Windows PowerShell (wrapper)
+.\pedidos-servicio\mvnw.cmd clean install
 ```
 
 ### 3. Crear archivo de configuración local
@@ -225,7 +230,12 @@ docker-compose logs -f orders-service
 
 #### Opción 1: Localmente con Maven
 ```bash
-mvn spring-boot:run
+# Desde la raíz del repo (usa el pom dentro de `pedidos-servicio`)
+mvn -f pedidos-servicio/pom.xml spring-boot:run
+
+# O entrar al submódulo y usar el wrapper
+cd pedidos-servicio
+./mvnw spring-boot:run
 ```
 
 #### Opción 2: Con Docker Compose
@@ -235,7 +245,8 @@ docker-compose up
 
 #### Opción 3: JAR compilado
 ```bash
-java -jar target/pedidos-0.0.1-SNAPSHOT.jar
+# Desde la raíz del repo (ruta al JAR dentro de `pedidos-servicio`)
+java -jar pedidos-servicio/target/pedidos-0.0.1-SNAPSHOT.jar
 ```
 
 #### Opción 4: En producción con docker-compose.prod.yml
@@ -256,6 +267,10 @@ docker compose -f docker-compose.prod.yml up -d --build
 ### Swagger en producción
 
 - **URL Swagger producción**: `http://18.101.110.59:8080/swagger-ui/index.html`
+
+---
+
+Nota: el código fuente y el `pom.xml` se encuentran ahora dentro de la carpeta `pedidos-servicio`. Para operaciones de `mvn` o `docker build` que dependan del contexto del proyecto, use `-f pedidos-servicio/pom.xml`, `./pedidos-servicio/mvnw` o establezca el contexto de Docker a `./pedidos-servicio`.
 
 ---
 
