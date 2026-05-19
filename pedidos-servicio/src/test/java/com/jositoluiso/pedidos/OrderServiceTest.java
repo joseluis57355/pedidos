@@ -10,6 +10,7 @@ import com.jositoluiso.pedidos.config.MetricsConfig;
 import com.jositoluiso.pedidos.dto.OrderRequestDTO;
 import com.jositoluiso.pedidos.dto.OrderItemRequestDTO;
 import com.jositoluiso.pedidos.dto.OrderResponseDTO;
+import com.jositoluiso.pedidos.service.OrderEventPublisher;
 import com.jositoluiso.pedidos.mapper.OrderMapper;
 import com.jositoluiso.pedidos.enums.OrderStatus;
 
@@ -37,6 +38,9 @@ class OrderServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private OrderEventPublisher orderEventPublisher;
 
     // Mock de métricas
     @Mock
@@ -115,6 +119,7 @@ class OrderServiceTest {
         verify(productRepository, times(1)).findById(1L);
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderMapper, times(1)).toResponseDTO(any(Order.class));
+        verify(orderEventPublisher, times(1)).publishOrderCreated(any(Order.class));
     }
 
     @Test
@@ -148,6 +153,7 @@ class OrderServiceTest {
         // VERIFICAMOS QUE NO SE LLAMA A save
         verify(orderRepository, never())
                 .save(any(Order.class));
+        verify(orderEventPublisher, never()).publishOrderCreated(any(Order.class));
     }
 
     @Test

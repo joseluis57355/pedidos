@@ -7,6 +7,7 @@ import com.jositoluiso.pedidos.enums.OrderStatus;
 import com.jositoluiso.pedidos.repository.OrderRepository;
 import com.jositoluiso.pedidos.repository.ProductRepository;
 import com.jositoluiso.pedidos.mapper.OrderMapper;
+import com.jositoluiso.pedidos.service.OrderEventPublisher;
 import com.jositoluiso.pedidos.exception.ResourceNotFoundException;
 
 import jakarta.transaction.Transactional;
@@ -36,6 +37,7 @@ public class OrderService {
     private final MetricsConfig metricsConfig;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
+    private final OrderEventPublisher orderEventPublisher;
 
     /**
      * Crear una nueva orden
@@ -126,6 +128,7 @@ public class OrderService {
         order.setAmount(totalAmount);
 
         Order savedOrder = orderRepository.save(order);
+        orderEventPublisher.publishOrderCreated(savedOrder);
 
         return orderMapper.toResponseDTO(savedOrder);
     }
