@@ -39,35 +39,6 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderEventPublisher orderEventPublisher;
 
-    /**
-     * Crear una nueva orden
-     * Invalida el caché de lista completa después de crear
-     */
-    /*@CacheEvict(value = "orders", allEntries = true)
-    public Order create(Order order) {
-        try {
-            order.setCreatedAt(LocalDateTime.now());
-            // Validación de datos
-            if (order.getCustomerName() == null || order.getCustomerName().isEmpty()) {
-                metricsConfig.incrementOrdersCreationError();
-                throw new IllegalArgumentException("Customer name cannot be empty");
-            }
-            if (order.getAmount() == null || order.getAmount().compareTo(BigDecimal.ZERO) < 0) {
-                metricsConfig.incrementOrdersCreationError();
-                throw new IllegalArgumentException("Amount cannot be negative");
-            }
-            // Guardar el pedido
-            Order savedOrder = orderRepository.save(order);
-            metricsConfig.incrementOrdersCreated();
-            return savedOrder;
-        } catch (Exception e) {
-            if (!(e instanceof IllegalArgumentException)) {
-                metricsConfig.incrementOrdersCreationError();
-            }
-            throw e;
-        }
-    }*/
-
      /**
      * Crear una nueva orden
      * Invalida el caché de lista completa después de crear

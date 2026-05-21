@@ -92,10 +92,15 @@ services:
     depends_on:
       kafka:
         condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       SERVER_PORT: 8081
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_KAFKA_CONSUMER_GROUP_ID: notificaciones-group
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
 
 volumes:
   redis-data:
