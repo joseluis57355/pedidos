@@ -75,7 +75,7 @@ services:
       - orders-network
 
   orders-service:
-    image: ghcr.io/joseluis57355/pedidos:latest
+    image: ghcr.io/joseluis57355/pedidos:${ORDER_IMAGE_TAG:-latest}
     container_name: orders-service
     depends_on:
       postgres:
@@ -100,7 +100,7 @@ services:
       - orders-network
 
   notifications-service:
-    image: ghcr.io/joseluis57355/notificaciones:latest
+    image: ghcr.io/joseluis57355/pedidos-notificaciones:${NOTIFICATIONS_IMAGE_TAG:-latest}
     container_name: notifications-service
     depends_on:
       kafka:
