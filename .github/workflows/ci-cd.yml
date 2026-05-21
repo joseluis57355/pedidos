@@ -13,8 +13,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  NOTIFICATIONS_IMAGE_NAME: ${{ github.repository }}-notificaciones
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  NOTIFICATIONS_IMAGE_NAME: ghcr.io/${{ github.repository }}-notificaciones
 
 jobs:
   build-and-test:
