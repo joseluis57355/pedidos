@@ -257,7 +257,13 @@ docker compose -f docker-compose.prod.yml up -d --build
 ```
 
 > En producción el stack incluye `orders-service`, `notifications-service`, `postgres`, `redis`, `kafka` y `zookeeper`.
-
+>
+> Las imágenes de producción se publican en GitHub Container Registry como:
+> - `ghcr.io/joseluis57355/pedidos`
+> - `ghcr.io/joseluis57355/pedidos-notificaciones`
+>
+> Puedes especificar un tag de despliegue con las variables de entorno `ORDER_IMAGE_TAG` y `NOTIFICATIONS_IMAGE_TAG`.
+>
 ### Acceder a la aplicación
 
 - **API REST Orders**: `http://localhost:8080`
@@ -487,6 +493,12 @@ docker compose -f docker-compose.prod.yml down --volumes --remove-orphans
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
+> En el archivo `.env.prod` puedes fijar los tags de las imágenes publicadas en GHCR:
+> ```bash
+> ORDER_IMAGE_TAG=main-e1c72d3
+> NOTIFICATIONS_IMAGE_TAG=main-e1c72d3
+> ```
+
 ### Dockerfile Explicado
 
 ```dockerfile
@@ -513,6 +525,7 @@ El proyecto incluye un **pipeline de CI/CD completamente automatizado** con GitH
 - ✅ **Ejecuta tests** automáticamente
 - ✅ **Construye imágenes Docker** para `orders-service` y `notifications-service` en rama main
 - ✅ **Publica en GitHub Container Registry** cuando la rama principal pasa
+- ✅ **Aplica tags de despliegue** a ambos servicios en GHCR
 - ✅ **Escanea seguridad** con Trivy
 - ✅ **Analiza calidad** con SonarCloud (si `SONAR_TOKEN` está configurado)
 - ✅ **Notifica** en Slack opcionalmente via `SLACK_WEBHOOK`
