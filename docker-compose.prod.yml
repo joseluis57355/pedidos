@@ -34,6 +34,46 @@ services:
     networks:
       - orders-network
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.9.0
+    container_name: orders-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'srvr' | nc localhost 2181 | grep 'Mode:'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - orders-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.9.0
+    container_name: orders-kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - orders-network
+
   orders-service:
     image: ghcr.io/joseluis57355/pedidos:latest
     container_name: orders-service
@@ -42,6 +82,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      kafka:
+        condition: service_started
     ports:
       - "${APP_PORT:-8080}:${APP_PORT:-8080}"
     environment:
@@ -52,6 +94,28 @@ services:
       SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT}
       SPRING_DATA_REDIS_PASSWORD: ${SPRING_DATA_REDIS_PASSWORD}
       SPRING_CACHE_TYPE: ${SPRING_CACHE_TYPE:-redis}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    restart: unless-stopped
+    networks:
+      - orders-network
+
+  notifications-service:
+    image: ghcr.io/joseluis57355/notificaciones:latest
+    container_name: notifications-service
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      NOTIFICACIONES_KAFKA_CONSUMER_GROUP_ID: notificaciones-group
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
     restart: unless-stopped
     networks:
       - orders-network

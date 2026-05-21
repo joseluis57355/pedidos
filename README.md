@@ -1,6 +1,6 @@
 # 📦 Pedidos API - REST API para Gestión de Órdenes
 
-Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS. Ver demo en: [http://18.101.110.59:8080/swagger-ui/index.html](http://18.101.110.59:8080/swagger-ui/index.html)
+Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Incluye un nuevo microservicio de notificaciones basado en **Kafka** y persistencia en PostgreSQL. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS. Ver demo en: [http://18.101.110.59:8080/swagger-ui/index.html](http://18.101.110.59:8080/swagger-ui/index.html)
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen)
@@ -39,7 +39,8 @@ Una API REST profesional para gestión de pedidos construida con **Java 21**, **
 
 ### DevOps & Infrastructure
 - ✅ **Contenerización con Docker** - Dockerfile optimizado
-- ✅ **Docker Compose** - Orquestación local con PostgreSQL y Redis
+- ✅ **Docker Compose** - Orquestación local con PostgreSQL, Redis, Kafka y Zookeeper
+- ✅ **Event-driven notifications** - Microservicio de notificaciones Kafka + PostgreSQL
 - ✅ **Spring Boot Actuator + Micrometer** - Health checks, metrics y Prometheus
 - ✅ **Redis Cache** - Spring Cache con Redis y serialización JSON
 - ✅ **Variables de entorno** - Configuración flexible y segura
@@ -69,6 +70,7 @@ Una API REST profesional para gestión de pedidos construida con **Java 21**, **
 | **Spring Boot** | 3.5.14 | Framework web |
 | **Spring Data JPA** | 3.5.14 | Persistencia de datos |
 | **PostgreSQL Driver** | 42.7.10 | BD en producción |
+| **Kafka** | 3.9.2 | Event streaming para notificaciones |
 | **H2** | 2.3.232 | BD para tests |
 | **Lombok** | 1.18.46 | Reducir boilerplate |
 
@@ -125,11 +127,16 @@ cd pedidos
 ### 2. Compilar el proyecto
 
 ```bash
-# Usando Maven directamente
-mvn clean install
+# Opciones para compilar (la aplicación se encuentra en la carpeta `pedidos-servicio`)
 
-# O usando el wrapper incluido
-./mvnw clean install
+# Usando Maven desde la raíz del repositorio
+mvn -f pedidos-servicio/pom.xml clean install
+
+# O usando el wrapper Maven dentro de `pedidos-servicio`
+./pedidos-servicio/mvnw clean install
+
+# En Windows PowerShell (wrapper)
+.\pedidos-servicio\mvnw.cmd clean install
 ```
 
 ### 3. Crear archivo de configuración local
@@ -225,7 +232,12 @@ docker-compose logs -f orders-service
 
 #### Opción 1: Localmente con Maven
 ```bash
-mvn spring-boot:run
+# Desde la raíz del repo (usa el pom dentro de `pedidos-servicio`)
+mvn -f pedidos-servicio/pom.xml spring-boot:run
+
+# O entrar al submódulo y usar el wrapper
+cd pedidos-servicio
+./mvnw spring-boot:run
 ```
 
 #### Opción 2: Con Docker Compose
@@ -235,7 +247,8 @@ docker-compose up
 
 #### Opción 3: JAR compilado
 ```bash
-java -jar target/pedidos-0.0.1-SNAPSHOT.jar
+# Desde la raíz del repo (ruta al JAR dentro de `pedidos-servicio`)
+java -jar pedidos-servicio/target/pedidos-0.0.1-SNAPSHOT.jar
 ```
 
 #### Opción 4: En producción con docker-compose.prod.yml
@@ -243,9 +256,12 @@ java -jar target/pedidos-0.0.1-SNAPSHOT.jar
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
+> En producción el stack incluye `orders-service`, `notifications-service`, `postgres`, `redis`, `kafka` y `zookeeper`.
+
 ### Acceder a la aplicación
 
-- **API REST**: `http://localhost:8080`
+- **API REST Orders**: `http://localhost:8080`
+- **API REST Notifications**: `http://localhost:8081/notifications`
 - **Swagger UI local**: `http://localhost:8080/swagger-ui/index.html`
 - **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
 - **Actuator - Health**: `http://localhost:8080/actuator/health`
@@ -256,6 +272,10 @@ docker compose -f docker-compose.prod.yml up -d --build
 ### Swagger en producción
 
 - **URL Swagger producción**: `http://18.101.110.59:8080/swagger-ui/index.html`
+
+---
+
+Nota: el código fuente y el `pom.xml` se encuentran ahora dentro de la carpeta `pedidos-servicio`. Para operaciones de `mvn` o `docker build` que dependan del contexto del proyecto, use `-f pedidos-servicio/pom.xml`, `./pedidos-servicio/mvnw` o establezca el contexto de Docker a `./pedidos-servicio`.
 
 ---
 
@@ -491,7 +511,7 @@ El proyecto incluye un **pipeline de CI/CD completamente automatizado** con GitH
 
 - ✅ **Compila** el código en cada push y pull request
 - ✅ **Ejecuta tests** automáticamente
-- ✅ **Construye imagen Docker** en rama main
+- ✅ **Construye imágenes Docker** para `orders-service` y `notifications-service` en rama main
 - ✅ **Publica en GitHub Container Registry** cuando la rama principal pasa
 - ✅ **Escanea seguridad** con Trivy
 - ✅ **Analiza calidad** con SonarCloud (si `SONAR_TOKEN` está configurado)

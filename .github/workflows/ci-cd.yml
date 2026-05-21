@@ -40,12 +40,12 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn -f pedidos-servicio/pom.xml clean package -DskipTests
         env:
           MAVEN_OPTS: -Dorg.slf4j.simpleLogger.defaultLogLevel=info
 
       - name: Run tests
-        run: mvn test
+        run: mvn -f pedidos-servicio/pom.xml test
         env:
           MAVEN_OPTS: -Dorg.slf4j.simpleLogger.defaultLogLevel=info
 
@@ -54,13 +54,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: target/surefire-reports/
+          path: pedidos-servicio/target/surefire-reports/
 
       - name: Publish test results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          files: target/surefire-reports/TEST-*.xml
+          files: pedidos-servicio/target/surefire-reports/TEST-*.xml
           check_name: Test Results
 
   docker-build:
@@ -85,7 +85,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn -f pedidos-servicio/pom.xml clean package -DskipTests
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -113,7 +113,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./pedidos-servicio
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -157,7 +157,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: '.'
+          scan-ref: './pedidos-servicio'
           format: 'sarif'
           output: 'trivy-results.sarif'
         continue-on-error: true
