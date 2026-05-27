@@ -1,6 +1,6 @@
 # 📦 Pedidos API - REST API para Gestión de Órdenes
 
-Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Incluye un nuevo microservicio de notificaciones basado en **Kafka** y persistencia en PostgreSQL. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS. Ver demo en: [http://18.101.110.59:8080/swagger-ui/index.html](http://18.101.110.59:8080/swagger-ui/index.html)
+Una API REST profesional para gestión de pedidos construida con **Java 21**, **Spring Boot 3**, **PostgreSQL** y prácticas DevOps modernas. Incluye un nuevo microservicio de notificaciones basado en **Kafka** y persistencia en PostgreSQL. Proyecto demostrativo de arquitectura limpia, testing automatizado, contenerización y despliegue en AWS. Ver demo en: [http://51.92.190.200:8080/swagger-ui/index.html](http://51.92.190.200:8080/swagger-ui/index.html)
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen)
@@ -277,7 +277,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ### Swagger en producción
 
-- **URL Swagger producción**: `http://18.101.110.59:8080/swagger-ui/index.html`
+- **URL Swagger producción**: `http://51.92.190.200:8080/swagger-ui/index.html`
 
 ---
 
